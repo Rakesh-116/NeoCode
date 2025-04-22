@@ -1,0 +1,3 @@
+FROM gcc:14.2
+
+WORKDIR /app
