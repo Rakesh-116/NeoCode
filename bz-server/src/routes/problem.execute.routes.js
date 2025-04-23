@@ -5,7 +5,6 @@ import { executeProblemController } from "../controllers/problem.execute.control
 import { submitProblemController } from "../controllers/problem.execute.controller.js";
 import { getExpectedOutputController } from "../controllers/problem.execute.controller.js";
 
-import { createProblemController } from "../controllers/problem.controller.js";
 import { getAllProblemsController } from "../controllers/problem.controller.js";
 import { getProblemDetailsController } from "../controllers/problem.controller.js";
 
@@ -21,10 +20,6 @@ problemExecuteRoute
 problemExecuteRoute
   .route("/submit")
   .post(userAuthentication, submitProblemController);
-
-problemExecuteRoute
-  .route("/create")
-  .post(userAuthentication, createProblemController);
 
 problemExecuteRoute.route("/get-all").get(getAllProblemsController);
 

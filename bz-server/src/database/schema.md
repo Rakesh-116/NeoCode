@@ -9,15 +9,8 @@ CREATE TYPE score_level AS ENUM ('10', '15', '20', '25', '30', '35');
 ### Users Table
 
 ```
-CREATE TABLE Users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  username VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  role VARCHAR(255) DEFAULT NULL, -- Keeping role as VARCHAR instead of ENUM
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-);
+
+
 ```
 
 ### Problem Table
@@ -104,4 +97,19 @@ CREATE TABLE savedSnippets(
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
+```
+
+```
+CREATE TABLE Blog (
+  id uuid primary key,
+  title TEXT NOT NULL,
+  tags TEXT[],
+  description TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  created_by UUID REFERENCES Users(id),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_by UUID REFERENCES Users(id),
+  visible BOOLEAN DEFAULT TRUE
+);
+
 ```

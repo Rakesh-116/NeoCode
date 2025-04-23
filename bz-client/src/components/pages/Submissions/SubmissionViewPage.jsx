@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { RxCross2 } from "react-icons/rx";
 import Editor from "@monaco-editor/react";
 import { Oval } from "react-loader-spinner";
@@ -32,7 +32,7 @@ const SubmissionModal = ({
 
   console.log(submissionResult);
 
-  const jsConfetti = new JSConfetti();
+  const jsConfetti = useMemo(() => new JSConfetti(), []);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -58,13 +58,7 @@ const SubmissionModal = ({
               <>
                 for{" "}
                 <Link
-                  to={{
-                    pathname: `/problems/${problemId}`,
-                    state: {
-                      submissionCode: sourceCode,
-                      submissionLanguage: language,
-                    },
-                  }}
+                  to={`/problems/${problemId}?submission_id=${submissionResult.id}`}
                   className="font-mono text-green-500"
                 >
                   '{title}'
@@ -127,7 +121,8 @@ const SubmissionModal = ({
                 </td>
                 <td className="border border-gray-600 px-4 py-2 text-[12px]">
                   {submissionResult ? (
-                    submissionResult.id || submissionResult.submissionDetails.id
+                    submissionResult.id ||
+                    submissionResult.submissionDetails?.id
                   ) : (
                     <div className="flex justify-center">
                       {renderLoader(30, 30)}

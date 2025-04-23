@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Register from "./components/pages/Auth/Register";
 import Login from "./components/pages/Auth/Login";
 import Home from "./components/pages/Home";
-import Blogs from "./components/pages/Blogs";
+import Blogs from "./components/pages/Blogs/Blogs";
 import Problems from "./components/pages/problems/Problems";
 import ProblemPage from "./components/pages/problems/ProblemPage";
 import NotFound from "./components/pages/NotFound";
@@ -16,6 +16,8 @@ import SavedSnippets from "./components/pages/SavedSnippets";
 import AdminRoute from "./components/pages/Auth/AdminRoute";
 import AdminDashboard from "./components/pages/Admin/AdminDashboard";
 import CreateProblem from "./components/pages/Admin/CreateProblem";
+import CreateBlog from "./components/pages/Admin/CreateBlog";
+import BlogPage from "./components/pages/Blogs/BlogPage";
 
 function App() {
   return (
@@ -26,6 +28,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Home />} />
           <Route path="/blogs" element={<Blogs />} />
+          <Route path="/blog/:id" element={<BlogPage />} />
           <Route path="/submissions" element={<Submissions />} />
           <Route path="/problemset" element={<Problems />} />
           <Route path="/problems/:id" element={<ProblemPage />} />
@@ -36,6 +39,7 @@ function App() {
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/newproblem" element={<CreateProblem />} />
+            <Route path="/newblog" element={<CreateBlog />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

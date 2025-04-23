@@ -183,7 +183,7 @@ const CreateProblem = () => {
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/api/problem/create`,
+        `${API_BASE_URL}/api/admin/problems/create`,
         submissionData,
         {
           headers: {

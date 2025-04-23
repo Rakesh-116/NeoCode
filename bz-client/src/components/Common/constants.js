@@ -87,6 +87,7 @@ const categories = [
   "Graph",
   "Pattern",
   "Web",
+  "I/O",
 ];
 
 const categoriesList = [
@@ -96,6 +97,7 @@ const categoriesList = [
   { id: "dynamic-programming", name: "Dynamic Programming" },
   { id: "graph", name: "Graph" },
   { id: "pattern", name: "Pattern" },
+  { id: "i-o", name: "I/O" },
   // { id: "web", name: "Web" },
 ];
 
@@ -123,6 +125,29 @@ const difficultyLevelsProperties = {
 
 const pagesCount = [10, 20, 30, 40, 50, 100];
 
+const tags = [
+  "Web-Development",
+  "Front-End",
+  "Back-End",
+  "Open-Source",
+  "Machine-Learning",
+  "React-JS",
+  "Node-JS",
+  "Tech-News",
+  "JavaScript-Tips",
+  "UI-Design",
+  "Array",
+  "String",
+  "String-DP",
+  "Math",
+  "Dynamic-Programming",
+  "Graph",
+  "Pattern",
+  "Web",
+  "Java",
+  "Custom-Sort",
+];
+
 export {
   problems,
   languages,
@@ -133,4 +158,5 @@ export {
   difficultyLevels,
   difficultyLevelsProperties,
   pagesCount,
+  tags,
 };

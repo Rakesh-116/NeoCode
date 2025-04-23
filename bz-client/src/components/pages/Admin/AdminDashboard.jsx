@@ -39,7 +39,7 @@ const AdminDashboard = () => {
               Hit that button below and let the blog-writing magic begin! 🪄
             </p>
             <button
-              onClick={() => navigate("/admin/blogs/newblog")}
+              onClick={() => navigate("/newblog")}
               className="mt-2 px-4 py-2 border border-white/30 rounded-lg hover:bg-gray-700 transition-all"
             >
               ✍️ Write a Blog

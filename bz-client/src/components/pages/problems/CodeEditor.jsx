@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Oval } from "react-loader-spinner";
 import { RxCross2 } from "react-icons/rx";
 import { CiPlay1 } from "react-icons/ci";
@@ -35,8 +35,6 @@ const CodeEditor = ({
 
   const [openModal, setOpenModal] = useState(false);
   const [openProhibitedKeyModal, setOpenProhibitedKeyModal] = useState(false);
-
-  const [isFromOpenEditor, setIsFromOpenEditor] = useState(false);
 
   useEffect(() => {
     if (openEditorData && openEditorData.code && openEditorData.language) {
@@ -424,19 +422,26 @@ const CodeEditor = ({
   //   }
   // }, [title, language]);
 
-  // useEffect(() => {
-  //   const storedList = JSON.parse(localStorage.getItem("storedDataList")) || [];
-  //   const savedCode = storedList.find(
-  //     (item) => item.title === title && item.selectedLanguage === language
-  //   );
+  const [searchParams] = useSearchParams();
+  const submissionId = searchParams.get("submission_id");
+  useEffect(() => {
+    if (openEditorData?.code === null && submissionId === null) {
+      const storedList =
+        JSON.parse(localStorage.getItem("storedDataList")) || [];
+      const savedCode = storedList.find(
+        (item) => item.title === title && item.selectedLanguage === language
+      );
 
-  //   if (savedCode) {
-  //     setCodeValues((prev) => ({
-  //       ...prev,
-  //       [language]: savedCode.problemCode,
-  //     }));
-  //   }
-  // }, [language]);
+      console.log(savedCode);
+
+      if (savedCode) {
+        setCodeValues((prev) => ({
+          ...prev,
+          [language]: savedCode.problemCode,
+        }));
+      }
+    }
+  }, [title, language]);
 
   return (
     <div className="flex flex-col h-full w-full rounded-md px-4">
@@ -481,17 +486,38 @@ const CodeEditor = ({
             ))}
           </select>
           <button
+            onClick={() => {
+              // Step 1: Set default code in state
+              setCodeValues((prev) => ({
+                ...prev,
+                [language]: defaultCode[language],
+              }));
+
+              // Step 2: Remove saved entry from localStorage
+              const storedList =
+                JSON.parse(localStorage.getItem("storedDataList")) || [];
+
+              const updatedList = storedList.filter(
+                (item) =>
+                  !(item.title === title && item.selectedLanguage === language)
+              );
+
+              localStorage.setItem(
+                "storedDataList",
+                JSON.stringify(updatedList)
+              );
+            }}
             onMouseEnter={() => setIsHovered("reset")}
             onMouseLeave={() => setIsHovered(null)}
-            className="outline-none"
+            className="outline-none relative"
           >
             <RiResetLeftLine className="text-white" />
             <p
-              className={`bg-black text-white px-2 py-1 rounded-md absolute z-20 text-xs  ${
+              className={`bg-black text-white px-2 py-1 rounded-md absolute z-20 text-xs ${
                 isHovered === "reset" ? "" : "hidden"
               }`}
             >
-              Reset Code
+              Reset&nbsp;Code
             </p>
           </button>
         </div>
@@ -513,7 +539,6 @@ const CodeEditor = ({
               const storedList =
                 JSON.parse(localStorage.getItem("storedDataList")) || [];
 
-              // Check if an entry with the same title and language exists
               const existingIndex = storedList.findIndex(
                 (item) =>
                   item.title === title && item.selectedLanguage === language

@@ -1,4 +1,9 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -51,86 +56,99 @@ const ProblemPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [searchParams] = useSearchParams();
+  const submissionId = searchParams.get("submission_id");
+
   useEffect(() => {
-    const fetchProblem = async () => {
-      setApiStatus(apiStatusConstants.inProgress);
-      const token = Cookies.get("neo_code_jwt_token");
-      if (!token) {
-        navigate("/login");
-        return;
-      }
-      const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/problem/get/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        const data = response.data.problem;
-        console.log(data);
-        const updatedData = {
-          id: data.id,
-          title: data.title,
-          description: data.description,
-          difficulty: data.difficulty,
-          inputFormat: data.input_format,
-          outputFormat: data.output_format,
-          constraints: data.constraints,
-          prohibitedKeys: data.prohibited_keys,
-          sampleTestcases: data.sample_testcase,
-          explaination: data.explaination,
-          solution: data.solution,
-          solutionLanguage: data.solution_language,
-          score: data.score,
-          category: data.category,
-        };
-        console.log(updatedData);
-        setProblem(updatedData);
-        setApiStatus(apiStatusConstants.success);
-      } catch (error) {
-        console.error("Error: ", error);
-        setApiStatus(apiStatusConstants.failure);
-        if (error.response.status === 405) {
-          navigate("/login");
-        }
-      }
-    };
-
-    const fetchSubmissions = async () => {
-      setSelectSubmission(null);
-      setSubmissionStatus(submissionStatusConstant.inProgress);
-      const token = Cookies.get("neo_code_jwt_token");
-      if (!token) {
-        navigate("/login");
-        return;
-      }
-
-      const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/problem/${id}/get-all-submissions`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        console.log(response.data.submissionDetails);
-        setSubmissionList(response.data.submissionDetails);
-        setSubmissionStatus(submissionStatusConstant.success);
-      } catch (error) {
-        console.error("Error: ", error);
-        setSubmissionStatus(submissionStatusConstant.failure);
-        if (error.response.status === 405) {
-          navigate("/login");
-        }
-      }
-    };
     if (selectRequest === selectRequestConstants.description) fetchProblem();
     else if (selectRequest === selectRequestConstants.submissions) {
       fetchSubmissions();
     }
   }, [id, selectRequest]);
+
+  const fetchProblem = async () => {
+    setApiStatus(apiStatusConstants.inProgress);
+    const token = Cookies.get("neo_code_jwt_token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    try {
+      let url = `${API_BASE_URL}/api/problem/get/${id}`;
+      if (submissionId) {
+        url += `?submission_id=${submissionId}`;
+      }
+
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log(response);
+      const data = response.data.problem;
+
+      const updatedData = {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        difficulty: data.difficulty,
+        inputFormat: data.input_format,
+        outputFormat: data.output_format,
+        constraints: data.constraints,
+        prohibitedKeys: data.prohibited_keys,
+        sampleTestcases: data.sample_testcase,
+        explaination: data.explaination,
+        solution: data.solution,
+        solutionLanguage: data.solution_language,
+        score: data.score,
+        category: data.category,
+      };
+      console.log(updatedData);
+      setProblem(updatedData);
+
+      const submissionData = response.data.submission;
+      if (submissionData != null) {
+        openEditor(submissionData.code, submissionData.language);
+      }
+
+      setApiStatus(apiStatusConstants.success);
+    } catch (error) {
+      console.error("Error: ", error);
+      setApiStatus(apiStatusConstants.failure);
+      if (error.response.status === 405) {
+        navigate("/login");
+      }
+    }
+  };
+
+  const fetchSubmissions = async () => {
+    setSelectSubmission(null);
+    setSubmissionStatus(submissionStatusConstant.inProgress);
+    const token = Cookies.get("neo_code_jwt_token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/problem/${id}/get-all-submissions`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log(response.data.submissionDetails);
+      setSubmissionList(response.data.submissionDetails);
+      setSubmissionStatus(submissionStatusConstant.success);
+    } catch (error) {
+      console.error("Error: ", error);
+      setSubmissionStatus(submissionStatusConstant.failure);
+      if (error.response.status === 405) {
+        navigate("/login");
+      }
+    }
+  };
 
   const handleDrag = (e) => {
     const newWidth = (e.clientX / window.innerWidth) * 100;
