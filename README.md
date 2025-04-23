@@ -362,7 +362,7 @@ Feel free to explore and contribute to the repository!
 If you have any feedback, suggestions, or doubts about this project, feel free to reach out.  
 We value your input and aim to improve continuously.
 
-- For feedback or suggestions, you can email us directly at: [rakeshwgpcgr@gmail.com](mailto:rakeshwgpcgr@gmail.com)
+- For feedback or suggestions, you can email us directly at: **rakeshwgpcgr@gmail.com**
 
 We appreciate your contributions and involvement!
 
