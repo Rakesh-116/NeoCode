@@ -122,4 +122,61 @@ const fetchUser = async (req, res) => {
   }
 };
 
-export { createUser, loginUser, fetchUser };
+const getProblemAnalysisController = async (req, res) => {
+  const userId = req.userId;
+
+  const problemAnalysisQuery = `
+    SELECT 
+      s.problem_id, 
+      s.verdict
+    FROM submissions s
+    WHERE s.user_id = $1
+    ORDER BY s.submission_time DESC;
+  `;
+
+  try {
+    const result = await pool.query(problemAnalysisQuery, [userId]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No submissions found for the user",
+      });
+    }
+
+    // Initialize counters
+    let verdictCounts = {
+      accepted: 0,
+      wrongAnswer: 0,
+      rte: 0,
+      tle: 0,
+    };
+
+    // Count each verdict type
+    for (const { verdict } of result.rows) {
+      if (verdict === "ACCEPTED") {
+        verdictCounts.accepted += 1;
+      } else if (verdict === "WRONG ANSWER") {
+        verdictCounts.wrongAnswer += 1;
+      } else if (verdict === "RTE") {
+        verdictCounts.rte += 1;
+      } else if (verdict === "TLE") {
+        verdictCounts.tle += 1;
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Verdict counts fetched successfully",
+      verdictCounts,
+    });
+  } catch (error) {
+    console.error("Error fetching problem analysis:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export { createUser, loginUser, fetchUser, getProblemAnalysisController };

@@ -5,23 +5,24 @@ dotenv.config();
 
 const { Pool } = pkg;
 
-// const pool = new Pool({
-//   host: process.env.DB_HOST,
-//   user: process.env.DB_USER_NAME,
-//   port: process.env.DB_PORT,
-//   password: process.env.DB_PASS,
-//   database: process.env.DB_NAME,
-//   ssl: { rejectUnauthorized: false },
-//   search_path: ["public"],
-// });
-
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "BZ_Base",
-  password: "1234",
-  port: 5432,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER_NAME,
+  port: process.env.DB_PORT,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  ssl: { rejectUnauthorized: false },
+  search_path: ["public"],
 });
+
+// const pool = new Pool({
+//   user: "postgres",
+//   host: "localhost",
+//   database: "BZ_Base",
+//   password: "1234",
+//   port: 5432,
+// });
+console.log("Connected to DB:", process.env.DB_HOST);
 
 async function connection() {
   try {

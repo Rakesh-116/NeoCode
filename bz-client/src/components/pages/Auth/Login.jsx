@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IoEyeSharp } from "react-icons/io5";
 import { LuEyeClosed } from "react-icons/lu";
 import axios from "axios";
@@ -9,14 +9,8 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isVisible, setIsVisible] = useState(false);
+  const [error, setError] = useState(""); // New state for error messages
   const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   const token = Cookies.get("neo_code_jwt_token");
-  //   if (token) {
-  //     navigate("/");
-  //   }
-  // }, []);
 
   const changeInput = (e) => {
     const { name, value } = e.target;
@@ -28,7 +22,10 @@ const Login = () => {
 
   const submitForm = async (e) => {
     e.preventDefault();
-    if (!username || !password) return;
+    if (!username || !password) {
+      setError("Please fill all the fields.");
+      return;
+    }
 
     const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -46,6 +43,11 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login failed", error);
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("An error occurred during login.");
+      }
     }
   };
 
@@ -55,6 +57,7 @@ const Login = () => {
         <h1 className="text-white text-center text-2xl font-semibold mb-6">
           Login
         </h1>
+
         <form onSubmit={submitForm} className="space-y-4">
           <input
             type="text"
@@ -81,6 +84,7 @@ const Login = () => {
               {isVisible ? <IoEyeSharp size={20} /> : <LuEyeClosed size={20} />}
             </button>
           </div>
+          {error && <p className="text-red-500 text-center">{error}</p>}{" "}
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md py-2 font-semibold"

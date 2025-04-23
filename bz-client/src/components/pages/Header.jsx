@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useState, useEffect, useRef } from "react";
+import { FaGithub } from "react-icons/fa";
 
 import { useUser } from "../../context/UserContext";
 
@@ -82,11 +83,13 @@ const Header = () => {
           isScrolled ? "bg-black/50 backdrop-blur-md shadow-lg" : "bg-black"
         } z-40`}
       >
-        <Link to="/">
+        <Link to="/" className="flex justify-start space-x-2 items-center">
+          <img src="/logo.png" className="w-8 h-6" />
           <span className="font-medium text-xl text-white/90 hover:text-white transition duration-300">
             NeoCode
           </span>
         </Link>
+
         <div className="flex space-x-8">
           <Link
             to="/"
@@ -149,67 +152,80 @@ const Header = () => {
             </Link>
           )}
         </div>
-        {isLoggedIn ? (
-          <div className="relative" ref={dropdownRef}>
+        <div className="flex items-center">
+          <a
+            href="https://github.com/Rakesh-116/NeoCode"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mr-6 flex items-center space-x-2 hover:opacity-80 transition border border-white/20 hover:border-white/25 hover:bg-white/10 p-2 rounded-md"
+          >
+            <FaGithub className="h-4 w-4" />
+            <span className="hidden sm:inline text-white/80 font-medium">
+              Open Source
+            </span>
+          </a>
+          {isLoggedIn ? (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                className="px-4 py-2 text-white rounded-md font-medium border border-white/20 hover:border-white/25 hover:bg-white/10 transition duration-300 flex items-center gap-2"
+                onClick={() => setShowDropdown(!showDropdown)}
+              >
+                <span>{userData?.username || "User"}</span>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {showDropdown && (
+                <div className="absolute right-0 mt-2 w-48 rounded-md bg-black border border-white/20 shadow-lg p-1 transition-all duration-300">
+                  {userData.role != "admin" && (
+                    <h1 className="p-2 opacity-50 cursor-default text-sm">
+                      {userData.email}
+                    </h1>
+                  )}
+                  <Link
+                    to="/profile"
+                    className="block p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    My Profile
+                  </Link>
+                  <Link
+                    to="/savedsnippets"
+                    className="block p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md"
+                  >
+                    Saved Snippets
+                  </Link>
+                  <button
+                    onClick={onLogOut}
+                    className="w-full text-left p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
             <button
               type="button"
-              className="px-4 py-2 text-white rounded-md font-medium border border-white/20 hover:border-white/25 hover:bg-white/10 transition duration-300 flex items-center gap-2"
-              onClick={() => setShowDropdown(!showDropdown)}
+              className="px-6 py-2 border border-white/25 text-white rounded-md font-medium hover:bg-white/10 transition duration-300"
+              onClick={() => onLogIn()}
             >
-              <span>{userData?.username || "User"}</span>
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              LogIn
             </button>
-
-            {showDropdown && (
-              <div className="absolute right-0 mt-2 w-48 rounded-md bg-black border border-white/20 shadow-lg p-1 transition-all duration-300">
-                {userData.role != "admin" && (
-                  <h1 className="p-2 opacity-50 cursor-default text-sm">
-                    {userData.email}
-                  </h1>
-                )}
-                <Link
-                  to="/profile"
-                  className="block p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md"
-                  onClick={() => setShowDropdown(false)}
-                >
-                  My Profile
-                </Link>
-                <Link
-                  to="/savedsnippets"
-                  className="block p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md"
-                >
-                  Saved Snippets
-                </Link>
-                <button
-                  onClick={onLogOut}
-                  className="w-full text-left p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <button
-            type="button"
-            className="px-6 py-2 border border-white/25 text-white rounded-md font-medium hover:bg-white/10 transition duration-300"
-            onClick={() => onLogIn()}
-          >
-            LogIn
-          </button>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

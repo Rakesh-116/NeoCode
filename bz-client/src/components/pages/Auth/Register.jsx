@@ -10,6 +10,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [isVisible, setIsVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // Error state
   const navigate = useNavigate();
 
   const changeInput = (e) => {
@@ -24,6 +25,7 @@ const Register = () => {
   const submitForm = async (e) => {
     e.preventDefault();
     if (!username || !password || !email) return;
+
     const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
     try {
       const response = await axios.post(
@@ -42,7 +44,13 @@ const Register = () => {
         navigate("/");
       }
     } catch (error) {
-      console.error("Registration failed", error);
+      if (error.response && error.response.status === 401) {
+        // Set error message if username already exists
+        setErrorMessage(error.response.data.message);
+      } else {
+        console.error("Registration failed", error);
+        setErrorMessage("Registration failed. Please try again.");
+      }
     }
   };
 
@@ -52,6 +60,7 @@ const Register = () => {
         <h1 className="text-white text-center text-2xl font-semibold mb-6">
           Register
         </h1>
+
         <form onSubmit={submitForm} className="space-y-4">
           <input
             type="text"
@@ -61,6 +70,7 @@ const Register = () => {
             onChange={changeInput}
             className="w-full bg-black/30 text-white border border-gray-600 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
           />
+
           <input
             type="email"
             name="email"
@@ -78,6 +88,9 @@ const Register = () => {
               onChange={changeInput}
               className="w-full bg-black/30 text-white border border-gray-600 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none pr-10"
             />
+            {errorMessage && (
+              <p className="text-red-500 text-center">{errorMessage}</p>
+            )}
             <button
               type="button"
               onClick={changeVisibility}

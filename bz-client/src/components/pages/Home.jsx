@@ -8,6 +8,7 @@ import axios from "axios";
 import Header from "./Header";
 import stars from "../../assets/stars.png";
 import { useUser } from "../../context/UserContext";
+import Footer from "./Footer";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -102,6 +103,7 @@ const Home = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

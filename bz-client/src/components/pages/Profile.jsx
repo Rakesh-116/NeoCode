@@ -1,48 +1,158 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import axios from "axios";
+import { Oval } from "react-loader-spinner";
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import Header from "./Header";
 import { useUser } from "../../context/UserContext";
-import Cookies from "js-cookie";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+const apiStatusConstant = {
+  initial: "INITIAL",
+  inProgress: "IN_PROGRESS",
+  success: "SUCCESS",
+  failure: "FAILURE",
+};
 
 const Profile = () => {
-  const { userData } = useUser();
+  const { userData } = useUser(); // Get user info from context
   const navigate = useNavigate();
+  const [verdictCounts, setVerdictCounts] = useState({
+    accepted: 0,
+    wrongAnswer: 0,
+    rte: 0,
+    tle: 0,
+  });
+  const [apiStatus, setApiStatus] = useState(apiStatusConstant.initial);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    if (userData) {
+      fetchUserVerdictData();
+    }
+  }, [userData]);
+
+  const fetchUserVerdictData = async () => {
     const jwtToken = Cookies.get("neo_code_jwt_token");
     if (!jwtToken) {
       navigate("/login");
+      return;
     }
-  }, [navigate]);
+    setApiStatus(apiStatusConstant.inProgress);
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/user/score`, {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      });
+      const problems = response.data.verdictCounts;
+      // Assuming the API gives verdict counts directly, so we can set them directly
+      setVerdictCounts({
+        accepted: problems.accepted,
+        wrongAnswer: problems.wrongAnswer,
+        rte: problems.rte,
+        tle: problems.tle,
+      });
+      setApiStatus(apiStatusConstant.success);
+    } catch (error) {
+      setError("Error fetching score data");
+      setApiStatus(apiStatusConstant.failure);
+    }
+  };
 
-  if (!userData) {
+  const renderContent = () => {
+    switch (apiStatus) {
+      case apiStatusConstant.inProgress:
+        return renderLoader();
+      case apiStatusConstant.failure:
+        return <div className="text-white">{error}</div>;
+      case apiStatusConstant.success:
+        return renderProfileContent();
+      default:
+        return null;
+    }
+  };
+
+  const renderProfileContent = () => {
     return (
-      <div className="flex justify-center items-center h-screen text-white">
-        <p>Loading profile...</p>
+      <div className=" w-full h-[80vh]">
+        {/* User Info Section */}
+        <div className="mb-8">
+          <h2 className="text-3xl text-white font-semibold">
+            {`Welcome, ${userData?.username || "User"}`} 👋
+          </h2>
+          <p className="text-lg text-white/70">{userData?.email}</p>
+        </div>
+
+        {/* Pie Chart Section */}
+        <div className="w-full max-w-sm  border border-white/70 p-4 rounded-md">
+          <Pie
+            data={{
+              labels: ["Accepted", "Wrong Answer", "RTE", "TLE"],
+              datasets: [
+                {
+                  label: "Verdict Distribution",
+                  data: [
+                    verdictCounts.accepted,
+                    verdictCounts.wrongAnswer,
+                    verdictCounts.rte,
+                    verdictCounts.tle,
+                  ],
+                  backgroundColor: [
+                    "rgba(34,197,94,0.8)",
+                    "rgba(239,68,68,0.8)",
+                    "rgba(59,130,246,0.8)",
+                    "rgba(234,179,8,0.8)",
+                  ],
+                },
+              ],
+            }}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "bottom",
+                  labels: {
+                    color: "#ffffff",
+                  },
+                },
+                tooltip: {
+                  callbacks: {
+                    label: (tooltipItem) => {
+                      return `${tooltipItem.label}: ${tooltipItem.raw}`;
+                    },
+                  },
+                },
+              },
+            }}
+          />
+        </div>
       </div>
     );
-  }
+  };
 
   return (
     <div className="bg-black/95 min-h-screen">
       <Header />
-      <div className="pt-28 px-12">
-        <div className="flex gap-2 w-full h-[60vh]">
-          <div className="w-1/3 h-full flex flex-col justify-start items-center">
-            <div className="w-full">
-              <div className="bg-black/70 border border-white/20 rounded-lg p-6">
-                <div className="text-white">
-                  <h1 className="text-2xl font-mono">{userData.username}</h1>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="w-2/3 h-full">{/* profile content */}</div>
-        </div>
-        <hr className="border-b border-white/20" />
-      </div>
+      <div className="pt-28 px-12">{renderContent()}</div>
     </div>
   );
 };
+
+const renderLoader = () => (
+  <div className="flex justify-center items-center h-[200px]">
+    <Oval
+      height={50}
+      width={50}
+      color="#4fa94d"
+      strokeWidth={4}
+      strokeWidthSecondary={4}
+    />
+  </div>
+);
 
 export default Profile;

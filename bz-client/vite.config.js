@@ -6,8 +6,8 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        // target: "https://neocode-api.rakeshp.me",
-        target: "http://localhost:8080",
+        target: "https://neocode-api.rakeshp.me",
+        // target: "http://localhost:8080",
         changeOrigin: true,
         secure: false, // If using self-signed SSL, set to `false`
       },
