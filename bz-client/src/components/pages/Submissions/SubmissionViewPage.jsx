@@ -1,11 +1,14 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
 import Editor from "@monaco-editor/react";
 import { Oval } from "react-loader-spinner";
 import { Link } from "react-router-dom";
 import JSConfetti from "js-confetti";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 import Button from "../../Common/Button";
+import ComplexityCache from "../../../utils/complexityCache";
 
 const renderLoader = (height = 50, width = 50) => (
   <Oval
@@ -30,9 +33,13 @@ const SubmissionModal = ({
   const title = submissionResult?.problem_title || null;
   const problemId = submissionResult?.problem_id || null;
 
-  console.log(submissionResult);
-
+  // Complexity analysis states
+  const [complexity, setComplexity] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [complexityError, setComplexityError] = useState(null);
+  
   const jsConfetti = useMemo(() => new JSConfetti(), []);
+  const complexityCache = useMemo(() => new ComplexityCache(), []);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -47,6 +54,70 @@ const SubmissionModal = ({
       });
     }
   }, [submissionResult?.verdict]);
+
+  const analyzeComplexity = async () => {
+    if (!sourceCode || !language) {
+      setComplexityError("Code or language not available");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setComplexityError(null);
+
+    try {
+      // Check cache first
+      const cachedResult = complexityCache.getCachedComplexity(sourceCode, language);
+      
+      if (cachedResult.found) {
+        setComplexity({
+          complexity: cachedResult.complexity,
+          fromCache: true,
+          timestamp: cachedResult.timestamp
+        });
+        setIsAnalyzing(false);
+        return;
+      }
+
+      // Make API call to analyze complexity
+      const token = Cookies.get("neo_code_jwt_token");
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/complexity/analyze`,
+        {
+          code: sourceCode,
+          language: language
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      if (response.data.success) {
+        const result = {
+          complexity: response.data.complexity,
+          fromCache: false,
+          timestamp: response.data.timestamp
+        };
+        
+        setComplexity(result);
+        
+        // Cache the result
+        complexityCache.setCachedComplexity(sourceCode, language, response.data.complexity);
+      } else {
+        setComplexityError(response.data.error || "Failed to analyze complexity");
+      }
+    } catch (error) {
+      console.error("Complexity analysis error:", error);
+      const errorMessage = error.response?.data?.error || error.message || "Failed to analyze complexity";
+      setComplexityError(errorMessage);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
@@ -91,6 +162,9 @@ const SubmissionModal = ({
                 </th>
                 <th className="border border-gray-600 px-4 py-2">
                   Subtask Info
+                </th>
+                <th className="border border-gray-600 px-4 py-2">
+                  Time Complexity
                 </th>
               </tr>
             </thead>
@@ -139,6 +213,47 @@ const SubmissionModal = ({
                       {renderLoader(30, 30)}
                     </div>
                   )}
+                </td>
+                <td className="border border-gray-600 px-4 py-2 text-[12px]">
+                  <div className="flex flex-col items-center gap-2">
+                    {complexity ? (
+                      <div className="flex flex-col items-center">
+                        <span className="font-mono text-blue-400 font-bold">
+                          {complexity.complexity}
+                        </span>
+                        {complexity.fromCache && (
+                          <span className="text-xs text-gray-400">cached</span>
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={analyzeComplexity}
+                        disabled={isAnalyzing}
+                        className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
+                          isAnalyzing
+                            ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                            : "bg-purple-600 hover:bg-purple-700 text-white"
+                        }`}
+                      >
+                        {isAnalyzing ? (
+                          <>
+                            <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent"></div>
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-sm">✨</span>
+                            Analyze
+                          </>
+                        )}
+                      </button>
+                    )}
+                    {complexityError && (
+                      <div className="text-xs text-red-400 text-center">
+                        {complexityError}
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             </tbody>

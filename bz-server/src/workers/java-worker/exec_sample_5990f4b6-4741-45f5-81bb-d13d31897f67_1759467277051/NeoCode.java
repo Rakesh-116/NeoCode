@@ -7,7 +7,7 @@ class NeoCode {
         while(t-->0){
             int a = sc.nextInt();
             int b = sc.nextInt();
-            System.out.println(Math.abs(-a-b));
+            System.out.println(a-b);
         }
     }
 }

@@ -20,12 +20,14 @@ import userRoute from "./routes/profile.user.routes.js";
 import problemExecuteRoute from "./routes/problem.execute.routes.js";
 import snippetsRoute from "./routes/snippets.routes.js";
 import userBlogsRoute from "./routes/blogs.user.routes.js";
+import complexityRoute from "./routes/complexity.routes.js";
 
 // User Routes
 app.use("/api/user", userRoute);
 app.use("/api/problem", problemExecuteRoute);
 app.use("/api/snippets", snippetsRoute);
 app.use("/api/blogs", userBlogsRoute);
+app.use("/api/complexity", complexityRoute);
 
 import usersRoute from "./routes/users.admin.routes.js";
 import problemsRoute from "./routes/problems.admin.routes.js";
